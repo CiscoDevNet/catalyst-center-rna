@@ -1,0 +1,80 @@
+# Copyright (c) 2023 Cisco and/or its affiliates.
+
+# This software is licensed to you under the terms of the Cisco Sample
+# Code License, Version 1.1 (the "License"). You may obtain a copy of the
+# License at
+
+#                https://developer.cisco.com/docs/licenses
+
+# All use of the material herein must be in accordance with the terms of
+# the License. All rights not expressly granted by the License are
+# reserved. Unless required by applicable law or agreed to separately in
+# writing, software distributed under the License is distributed on an "AS
+# IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied.
+
+---
+- api: /dna/intent/api/v1/network-device
+- api: /dna/intent/api/v1/network-device/count
+- api: /dna/intent/api/v1/site
+- api: /dna/intent/api/v1/site/count
+- api: /dna/intent/api/v1/compliance/detail
+- api: /dna/intent/api/v1/network-device
+- api: /dna/intent/api/v1/wireless/profile
+- api: /dna/intent/api/v1/enterprise-ssid
+- api: /dna/intent/api/v1/device-health
+- api: /dna/intent/api/v1/client-health
+- api: /dna/home
+  format: html
+- api: /dna/intent/api/v1/licenses/device/count?device_type=Switches%20and%20Hubs
+  file: dnac_css_hc_switchingDevice_is_present
+- api: /dna/intent/api/v1/licenses/device/count?device_type=Wireless%20Controller
+  file: dnac_css_hc_wlc_is_present
+- api: /dna/intent/api/v1/image/importation
+- api: /dna/intent/api/v1/issues
+- api: /dna/intent/api/v1/template-programmer/template
+- api: /dna/intent/api/v1/licenses/smartAccounts
+- api: /dna/intent/api/v1/global-pool
+- api: /dna/intent/api/v1/event/subscription/count
+- api: /dna/intent/api/v1/service-provider
+- api: /api/v1/licensemanager/config/eula
+
+# private APIs for getting dnac meta data
+- api: /api/system/v1/maglev/packages
+- api: /api/system/v1/catalog/release-channel/active
+- api: /api/system/v1/catalog/release-channel/dnac/latest
+- api: /api/system/v1/systemupdater/common/update_status
+- api: /api/system/v1/systemupdater/common/availabe_update_info
+- api: /api/system/v1/maglev/nodes/config
+- api: /api/v1/disasterrecovery/dr/system/details
+- api: /api/telemetry-agent/v1/membership/info
+- api: /api/v1/inventory/global-settings?propertyName=device_controllability
+  file: hc_deviceControllability_is_enabled
+- api: /api/v2/data/customer-facing-service/summary/ConnectivityDomain
+- api: /api/v1/commonsetting/global/-1
+- api: /api/kairos/v1/config/data/read
+- api: /api/v1/reasoner/cloud-connect/info
+- api: /api/v1/ipam/configuration
+- api: /api/v1/aca-controller-service/getAcaVnSummary
+- api: /api/endpoint-analytics/v1/eps/classification/rule?ruleType=Custom%20Rule
+  file: dnac_css_hc_profiling_rule_is_configured
+- api: /api/system/v1/maglev/services/summary
+- api: /api/assurance/v1/webex/oauth-status
+- api: /api/v2/data/customer-facing-service/summary/Segment
+- api: /api/v1/system/health/cisco-ise
+- api: /api/v2/data/customer-facing-service/count/policy/access
+- api: /api/v1/scheduled-job/count?scheduleState=ACTIVE&type=DEFAULT&module=SECURITY_ADVISORIES&recurringFlag=true
+  file: dnac_css_hc_reccuring_sec_adv_is_enabled
+- api: /api/v2/data/customer-facing-service/summary/scalablegroup/access
+- api: /api/assurance/v1/thousandEyes/token
+- api: /api/iox/service/api/v1/appmgr/network-device/app-device?searchByApp=ThousandEyes Enterprise Agent&searchByAppId=55058C1E2DF3D8BD484A229F1474F496
+  file: api_iox_service_api_v1_appmgr_network-device/app-device_thousandyEyes
+- api: /api/v1/server-management/umbrella/health
+- api: /api/endpoint-analytics/v1/eps/setup/status/anomaly-detection
+- api: /dna/system/api/v1/roles
+- api: /api/v1/application-recognition/externalSources/ms-office-365
+- api: /api/system/v1/identitymgmt/aaa-server/external-authentication
+- api: /api/v1/nfv-provisioning-service/vmanage-credentials
+- api: /api/v1/server-management/stealthwatch
+- api: /api/v2/data/customer-facing-service/summary/policy/application
+- api: /api/system/v1/maglev/backup
