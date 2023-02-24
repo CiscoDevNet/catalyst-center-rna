@@ -38,6 +38,7 @@
 - api: /dna/intent/api/v1/event/subscription/count
 - api: /dna/intent/api/v1/service-provider
 - api: /api/v1/licensemanager/config/eula
+- api: /api/v1/dna-maps-service/preferences/cmxServers
 
 # private APIs for getting dnac meta data
 - api: /api/system/v1/maglev/packages
@@ -78,3 +79,7 @@
 - api: /api/v1/server-management/stealthwatch
 - api: /api/v2/data/customer-facing-service/summary/policy/application
 - api: /api/system/v1/maglev/backup
+- api: /api/v1/sftp
+- api: /api/v1/licensemanager/config/credentials/cco
+- api: /api/v1/image/importation/issuMatrixAvailability
+- api: /api/v1/licensemanager/compliance/licensePurchaseInformation
