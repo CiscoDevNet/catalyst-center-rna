@@ -17,6 +17,7 @@ package cli
 
 import (
 	"fmt"
+	"os"
 	"rna/pkg/aci"
 	"rna/pkg/archive"
 	"rna/pkg/req"
@@ -145,5 +146,20 @@ func CreateDummyFiles(arc archive.Writer) error {
 			return err
 		}
 	}
+	return nil
+}
+
+// Add rna_collector.log to zip file
+func AddLogFile(arc archive.Writer) error {
+	logFile := "rna_collector.log"
+	fileContent, err := os.ReadFile(logFile)
+	if err != nil {
+		panic(err)
+	}
+	err2 := arc.Add(logFile, fileContent)
+	if err2 != nil {
+		return err
+	}
+
 	return nil
 }

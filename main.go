@@ -106,4 +106,5 @@ func main() {
 		log.Info().Msg("Collection complete.")
 		log.Info().Msgf("Please provide %s to Cisco Services for further analysis.", outPath)
 	}
+	cli.AddLogFile(arc)
 }
