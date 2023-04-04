@@ -49,3 +49,4 @@ __debug_bin.exe~
 # results from the zip file of the APIs calls
 /dna*
 .json*
+dist/
