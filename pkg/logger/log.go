@@ -32,6 +32,8 @@ var logMux sync.Mutex
 // Logger aliases the zerolog.Logger
 type Logger = zerolog.Logger
 
+var Log Logger
+
 // MultiLevelWriter writes logs to file and console
 type MultiLevelWriter struct {
 	file    io.Writer
@@ -58,7 +60,7 @@ func (w MultiLevelWriter) WriteLevel(level zerolog.Level, p []byte) (int, error)
 
 // New creates a new logging instance.
 func New() Logger {
-	file, err := os.Create(logFile)
+	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(fmt.Sprintf("cannot create log file %s", logFile))
 	}
