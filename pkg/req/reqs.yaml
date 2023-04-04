@@ -83,3 +83,12 @@
 - api: /api/v1/licensemanager/config/credentials/cco
 - api: /api/v1/image/importation/issuMatrixAvailability
 - api: /api/v1/licensemanager/compliance/licensePurchaseInformation
+- api: /api/assurance/v1/airsense/getIcapSessionList?icapType=full
+  file: dnac_css_hc_client_packet_capture_is_present
+- api: /api/v2/data/customer-facing-service/summary/policy/access
+- api: /api/v2/data/customer-facing-service/summary/ConnectivityDomain
+- api: /api/assurance/v1/airsense/getIcapActiveSessionList?icapType=ICAP_RF_STATS
+  file: dnac_css_hc_AP_stats_capture_is_enabled
+- api: /api/v1/aca-controller-service/platform/details
+- api: /api/assurance/v1/airsense/getIcapActiveSessionList?icapType=ICAP_ANOMALY
+  file: dnac_css_hc_Anomaly_Capture_is_enabled
