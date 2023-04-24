@@ -20,7 +20,7 @@ RNA collects data from a various APIs on Cisco DNA Center. The data collected th
 
 The following file can be referenced to see the API queries performed by RNA:
 
-<https://wwwin-github.cisco.com/netascode/dnac-collector/blob/master/pkg/req/reqs.yaml>
+<https://github.com/CiscoDevNet/dnac-rna/blob/main/pkg/req/reqs.yaml>
 
 ## Safety/Security
 
