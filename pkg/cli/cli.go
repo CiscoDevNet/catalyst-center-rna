@@ -20,11 +20,11 @@ import (
 	"os"
 	"rna/pkg/aci"
 	"rna/pkg/archive"
+	"rna/pkg/logger"
 	"rna/pkg/req"
+	"strconv"
 	"strings"
 	"time"
-
-	"rna/pkg/logger"
 
 	"github.com/rs/zerolog"
 	"github.com/tidwall/gjson"
@@ -45,7 +45,7 @@ type Config struct {
 // NewConfig populates default values
 func NewConfig() Config {
 	return Config{
-		RequestRetryCount: 3,
+		RequestRetryCount: 2,
 		RetryDelay:        10,
 		BatchSize:         10,
 	}
@@ -74,6 +74,8 @@ func GetClient(cfg Config) (aci.Client, error) {
 
 // Fetch data via API.
 func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg Config) error {
+	var data string = ""
+	var resplaceholder gjson.Result
 	log = logger.New()
 	startTime := time.Now()
 	log.Debug().Time("start_time", startTime).Msgf("begin: %s", req.Prefix)
@@ -90,23 +92,58 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 	}
 
 	// var mods []func(*aci.Req)
+	//query := url.Values{}
+
 	for k, v := range req.Query {
+		if k == "startTime" {
+			start := time.Now().UnixMilli() - 950000
+			v = strconv.Itoa(int(start))
+		} else if k == "endTime" {
+			end := time.Now().UnixMilli() - 600000
+			v = strconv.Itoa(int(end))
+		} else if k == "toDate" {
+			toDate := time.Now().AddDate(0, 0, -1)
+			y, m, d := toDate.Date()
+			output := fmt.Sprintf("%d-%d-%d", y, int(m), d)
+			v = output
+		} else if k == "fromDate" {
+			now := time.Now()
+			startDate := now.AddDate(-1, 0, -1)
+			y, m, d := startDate.Date()
+			output := fmt.Sprintf("%d-%d-%d", y, int(m), d)
+			v = output
+		}
 		mods = append(mods, aci.Query(k, v))
 	}
 
-	// Handle tenants individually for scale purposes
-	res, err := client.Get(req.Path, mods...)
-	// Retry for requestRetryCount times
-	for retries := 0; err != nil && retries < cfg.RequestRetryCount; retries++ {
-		log.Warn().Err(err).Msgf("request failed for %s. Retrying after %d seconds.",
-			req.Path, cfg.RetryDelay)
-		time.Sleep(time.Second * time.Duration(cfg.RetryDelay))
-		res, err = client.Get(req.Path, mods...)
+	if req.Method == "POST" {
+		res, err := client.Post(req.Path, data, mods...)
+		resplaceholder = res
+		for retries := 0; err != nil && retries < cfg.RequestRetryCount; retries++ {
+			log.Warn().Err(err).Msgf("request failed for %s. Retrying after %d seconds.",
+				req.Path, cfg.RetryDelay)
+			time.Sleep(time.Second * time.Duration(cfg.RetryDelay))
+			res, err = client.Post(req.Path, data, mods...)
+			resplaceholder = res
+		}
+	} else {
+		//Handle tenants individually for scale purposes
+		res, err := client.Get(req.Path, mods...)
+		resplaceholder = res
+		//Retry for requestRetryCount times
+		for retries := 0; err != nil && retries < cfg.RequestRetryCount; retries++ {
+			log.Warn().Err(err).Msgf("request failed for %s. Retrying after %d seconds.",
+				req.Path, cfg.RetryDelay)
+			time.Sleep(time.Second * time.Duration(cfg.RetryDelay))
+			res, err = client.Get(req.Path, mods...)
+			resplaceholder = res
+		}
+
+		if err != nil {
+			return fmt.Errorf("request failed for %s: %v", req.Path, err)
+		}
+		log.Info().Msgf("%s > Complete", req.Prefix)
 	}
-	if err != nil {
-		return fmt.Errorf("request failed for %s: %v", req.Path, err)
-	}
-	log.Info().Msgf("%s > Complete", req.Prefix)
 
 	var fileName string
 	if len(req.File) > 0 {
@@ -119,14 +156,14 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 	var fileContent []byte
 	fileExtension := "json"
 	if htmlFormat {
-		stringTest := gjson.Get(res.Raw, "Content")
+		stringTest := gjson.Get(resplaceholder.Raw, "Content")
 		fileContent = []byte(stringTest.Str)
 		fileExtension = "html.txt"
 	} else {
-		fileContent = []byte(res.Raw)
+		fileContent = []byte(resplaceholder.Raw)
 	}
 
-	err = arc.Add(fileName+"."+fileExtension, fileContent)
+	err := arc.Add(fileName+"."+fileExtension, fileContent)
 	if err != nil {
 		return err
 	}

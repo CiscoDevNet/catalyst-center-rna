@@ -39,11 +39,17 @@
 - api: /dna/intent/api/v1/service-provider
 - api: /api/v1/licensemanager/config/eula
 - api: /api/v1/dna-maps-service/preferences/cmxServers
+- api: /dna/intent/api/v1/site?type=building
+  file: _dna_intent_api_v1_site_building.json
+- api: /dna/intent/api/v1/device-replacement/count
+- api: /dna/intent/api/v1/eox-status/device
+- api: /dna/intent/api/v1/security-advisory/advisory/aggregate
 
 # private APIs for getting dnac meta data
 - api: /api/system/v1/maglev/packages
 - api: /api/system/v1/catalog/release-channel/active
 - api: /api/system/v1/catalog/release-channel/dnac/latest
+- api: /api/system/v1/maglev/release/current
 - api: /api/system/v1/systemupdater/common/update_status
 - api: /api/system/v1/systemupdater/common/availabe_update_info
 - api: /api/system/v1/maglev/nodes/config
@@ -92,3 +98,34 @@
 - api: /api/v1/aca-controller-service/platform/details
 - api: /api/assurance/v1/airsense/getIcapActiveSessionList?icapType=ICAP_ANOMALY
   file: dnac_css_hc_Anomaly_Capture_is_enabled
+- api: /api/v1/task?serviceType=NCIV&data=KGV-UPLOAD-TASK-SCHEDULED&sortBy=endTime&order=dsc&limit=1
+  file: dnac_css_hc_updated_KGV_is_present
+- api: /api/assurance/v1/network-device/healthSummary
+  file: api_assurance_v1_network-device_healthSummary
+  method: POST
+  query: 
+    measureBy: "global"
+    windowInMin: "1"
+    startTime : ${{startTime}}
+    endTime : ${{endTime}}
+    approach: "latest"
+- api: /api/cloud-connectivity-sense/v1/sense-op/insight/1/roi/report
+  file: _api_dna_roi
+  query:
+    fromDate: ${{fromDate}}
+    toDate: ${{toDate}}
+    interval: "1m"
+    source: "roi"
+- api: /dna/intent/api/v1/compliance/count?complianceStatus=NON_COMPLIANT
+  file: _dna_intent_api_v1_compliance_count_non_compliant
+- api: /dna/intent/api/v1/compliance/count?complianceStatus=COMPLIANT
+  file: _dna_intent_api_v1_compliance_count_compliant
+- api: /dna/intent/api/v1/compliance/detail?complianceType=IMAGE&complianceStatus=NON_COMPLIANT
+  file: _dna_intent_api_v1_compliance_count_non_compliant_image
+- api: /dna/intent/api/v1/issues?priority=P2&issueStatus=active
+  file: dna_intent_api_v1_issues_p2
+- api: /dna/intent/api/v1/issues?priority=P1&issueStatus=active
+  file: dna_intent_api_v1_issues_p1
+- api: /dna/intent/api/v1/site?type=building
+- api: /api/endpoint-analytics/v1/eps/endpoint/count?trustScoreSummary=true&classification=all
+  file: _api_endpoint_analytics_v1_eps_endpoint_count_trustScoreSummary
