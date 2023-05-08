@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http" // AR ** looks unique to ACI
+	"net/http"
 	"strings"
 	"time"
 
@@ -49,7 +49,8 @@ type Client struct {
 
 // NewClient creates a new ACI HTTP client.
 // Pass modifiers in to modify the behavior of the client, e.g.
-//  client, _ := NewClient("apic", "user", "password", RequestTimeout(120))
+//
+//	client, _ := NewClient("apic", "user", "password", RequestTimeout(120))
 func NewClient(url, usr, pwd string, mods ...func(*Client)) (Client, error) {
 
 	// Normalize the URL
