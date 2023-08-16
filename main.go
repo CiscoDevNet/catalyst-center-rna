@@ -30,7 +30,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// Version comes from CI
+// Version comes from CL
 var (
 	log  zerolog.Logger
 	args Args
@@ -87,6 +87,7 @@ func main() {
 		}
 		batch++
 	}
+
 	cli.CreateDummyFiles(arc)
 
 	fmt.Println(strings.Repeat("=", 30))

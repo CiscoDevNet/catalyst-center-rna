@@ -28,9 +28,13 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/tidwall/gjson"
+	//"github.com/tidwall/sjson"
 )
 
 var log zerolog.Logger
+var globalId string
+var version = 223
+var versionFound bool
 
 // Config is CLI conifg
 type Config struct {
@@ -72,105 +76,202 @@ func GetClient(cfg Config) (aci.Client, error) {
 	return client, nil
 }
 
-// Fetch data via API.
-func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg Config) error {
-	var data string = ""
-	var resplaceholder gjson.Result
-	log = logger.New()
-	startTime := time.Now()
-	log.Debug().Time("start_time", startTime).Msgf("begin: %s", req.Prefix)
+func replacePathPlaceholder(path string, valueToRaplace, replacement string) string {
+	tempPath := strings.Replace(path, valueToRaplace, replacement, 1)
+	return tempPath
+}
 
-	log.Info().Msgf("fetching %s...", req.Prefix)
-	log.Debug().Str("url", req.Path).Msg("requesting resource")
-
-	var mods []func(*aci.Req)
-
-	htmlFormat := false
-	if len(req.Format) > 0 {
-		mods = append(mods, aci.FileFormat(req.Format))
-		htmlFormat = true
+func isVersionInList(version int, list []int) bool {
+	for _, val := range list {
+		if val == version {
+			return true
+		}
 	}
+	return false
+}
 
-	// var mods []func(*aci.Req)
-	//query := url.Values{}
-
-	for k, v := range req.Query {
-		if k == "startTime" {
-			start := time.Now().UnixMilli() - 950000
-			v = strconv.Itoa(int(start))
-		} else if k == "endTime" {
-			end := time.Now().UnixMilli() - 600000
-			v = strconv.Itoa(int(end))
-		} else if k == "toDate" {
-			toDate := time.Now().AddDate(0, 0, -1)
-			y, m, d := toDate.Date()
-			output := fmt.Sprintf("%d-%d-%d", y, int(m), d)
-			v = output
-		} else if k == "fromDate" {
-			now := time.Now()
-			startDate := now.AddDate(-1, 0, -1)
-			y, m, d := startDate.Date()
-			output := fmt.Sprintf("%d-%d-%d", y, int(m), d)
-			v = output
-		}
-		mods = append(mods, aci.Query(k, v))
-	}
-
-	if req.Method == "POST" {
-		res, err := client.Post(req.Path, data, mods...)
-		resplaceholder = res
-		for retries := 0; err != nil && retries < cfg.RequestRetryCount; retries++ {
-			log.Warn().Err(err).Msgf("request failed for %s. Retrying after %d seconds.",
-				req.Path, cfg.RetryDelay)
-			time.Sleep(time.Second * time.Duration(cfg.RetryDelay))
-			res, err = client.Post(req.Path, data, mods...)
-			resplaceholder = res
-		}
-	} else {
-		//Handle tenants individually for scale purposes
-		res, err := client.Get(req.Path, mods...)
-		resplaceholder = res
-		//Retry for requestRetryCount times
-		for retries := 0; err != nil && retries < cfg.RequestRetryCount; retries++ {
-			log.Warn().Err(err).Msgf("request failed for %s. Retrying after %d seconds.",
-				req.Path, cfg.RetryDelay)
-			time.Sleep(time.Second * time.Duration(cfg.RetryDelay))
-			res, err = client.Get(req.Path, mods...)
-			resplaceholder = res
-		}
-
-		if err != nil {
-			return fmt.Errorf("request failed for %s: %v", req.Path, err)
-		}
-		log.Info().Msgf("%s > Complete", req.Prefix)
-	}
-
+func setFileName(req req.Request) string {
 	var fileName string
 	if len(req.File) > 0 {
 		fileName = req.File
 	} else {
 		fileName = strings.ReplaceAll(req.Prefix, "/", "_")
 	}
+	return fileName
+}
 
+func writeToFileAndZip(fileName string, res gjson.Result, arc archive.Writer) error {
 	// save APIs call to file
 	var fileContent []byte
 	fileExtension := "json"
-	if htmlFormat {
-		stringTest := gjson.Get(resplaceholder.Raw, "Content")
-		fileContent = []byte(stringTest.Str)
-		fileExtension = "html.txt"
-	} else {
-		fileContent = []byte(resplaceholder.Raw)
-	}
-
+	fileContent = []byte(res.Raw)
 	err := arc.Add(fileName+"."+fileExtension, fileContent)
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	log.Debug().
-		TimeDiff("elapsed_time", time.Now(), startTime).
-		Msgf("done: %s", req.Prefix)
+func createErrorResult(err error) gjson.Result {
+	// Create a custom gjson.Result representing the error
+	// For example, you can use a JSON string to represent the error
+	// In this example, we will use a simple message as the error
+	errorJSON := fmt.Sprintf(`{"error" : "%s"}`, err.Error())
+
+	// Parse the JSON string to create the gjson.Result
+	errorResult := gjson.Parse(errorJSON)
+
+	return errorResult
+}
+
+// Fetch data via API.
+func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg Config) error {
+	var data string = ""
+	body := aci.Body{Str: data}
+	log = logger.New()
+	startTime := time.Now()
+	log.Debug().Time("start_time", startTime).Msgf("begin: %s", req.Prefix)
+	var mods []func(*aci.Req)
+	filename := setFileName(req)
+
+	//Assign values to dynamic queries
+	for k, v := range req.Query {
+		switch k {
+		case "startTime":
+			//today - 1 day and 1 hour
+			start := time.Now().UnixMilli() - 950000
+			v = strconv.Itoa(int(start))
+		case "endTime":
+			//today - 1 hour
+			end := time.Now().UnixMilli() - 600000
+			v = strconv.Itoa(int(end))
+		case "toDate":
+			// epoch time yesterday
+			toDate := time.Now().AddDate(0, 0, -1)
+			y, m, d := toDate.Date()
+			output := fmt.Sprintf("%d-%d-%d", y, int(m), d)
+			v = output
+		case "fromDate":
+			//epoch time yesterday last year
+			now := time.Now()
+			startDate := now.AddDate(-1, 0, -1)
+			y, m, d := startDate.Date()
+			output := fmt.Sprintf("%d-%d-%d", y, int(m), d)
+			v = output
+		}
+		path := fmt.Sprintf("%s", k)
+		body = body.Set(path, v)
+		mods = append(mods, aci.Query(k, v))
+	}
+
+	var err error
+	var res gjson.Result
+
+	// Determie if it's POST operation and version requirements
+	if req.Method == "POST" && (len(req.Version) == 0 || isVersionInList(version, req.Version)) {
+		data = body.Str
+		log.Info().Msgf("fetching %s...", req.Prefix)
+		log.Debug().Str("url", req.Path).Msg("requesting resource")
+		res, err = client.Post(req.Path, data, mods...)
+
+	} else {
+		// Check  version requirement to run API
+		if len(req.Version) == 0 || isVersionInList(version, req.Version) {
+			//Replace req.Path yaml variable with value
+			if len(req.Variable) > 0 {
+				trimmedVariable := strings.Trim(req.Variable, "{}")
+				switch trimmedVariable {
+				case "globalId":
+					if len(globalId) > 0 {
+						req.Path = replacePathPlaceholder(req.Path, req.Variable, globalId)
+					}
+				}
+			}
+
+			log.Info().Msgf("fetching %s...", req.Prefix)
+			log.Debug().Str("url", req.Path).Msg("requesting resource")
+			res, err = client.Get(req.Path, mods...)
+
+			//Check if we need to store something from response
+			if req.Store {
+				switch req.VarStore {
+				case "globalId":
+					if res.Get("response.0.id").Exists() {
+						//Store GlobalId value for future calls
+						globalId = res.Get("response.0.id").String()
+					}
+				case "version":
+					if versionFound == false {
+						if res.Get("response.displayVersion").Exists() {
+							stringVersion := res.Get("response.displayVersion").String()
+							slicedVersion := stringVersion[0:5]
+							newStringVersion := strings.ReplaceAll(slicedVersion, ".", "")
+							version, err = strconv.Atoi(newStringVersion)
+							versionFound = true
+							log.Info().Msgf("version found is " + fmt.Sprint(version))
+						}
+					}
+				case "version2":
+					if versionFound == false {
+						dictArray := res.Get("response").Array()
+						var versionValue, trimmedVersion string
+						for _, elem := range dictArray {
+							appstacks := elem.Get("appstacks").Array()
+							for _, appstack := range appstacks {
+								appstackValue := appstack.String()
+								if strings.Contains(appstackValue, "maglev-system") {
+									versionValue = strings.Split(appstackValue, ":")[1]
+									trimmedVersion = versionValue[0:3]
+									if trimmedVersion == "1.6" {
+										// if 1.6  set version  to 223
+										version = 223
+										versionFound = true
+										log.Info().Msgf("version found is " + fmt.Sprint(version))
+									}
+									break
+								}
+							}
+						}
+					}
+				case "version3":
+					if versionFound == false {
+						if res.Get("response.version").Exists() {
+							stringVersion := res.Get("response.version").String()
+							slicedVersion := stringVersion[0:5]
+							newStringVersion := strings.ReplaceAll(slicedVersion, ".", "")
+							version, err = strconv.Atoi(newStringVersion)
+							versionFound = true
+							log.Info().Msgf("version found is " + fmt.Sprint(version))
+						}
+					}
+				}
+			}
+		}
+	}
+
+	//Retry for requestRetryCount times
+	for retries := 0; err != nil && retries < cfg.RequestRetryCount; retries++ {
+		log.Warn().Err(err).Msgf("request failed for %s. Retrying after %d seconds.",
+			req.Path, cfg.RetryDelay)
+		time.Sleep(time.Second * time.Duration(cfg.RetryDelay))
+		res, err = client.Get(req.Path, mods...)
+	}
+
+	if err != nil {
+		error := createErrorResult(err)
+		writeToFileAndZip(filename, error, arc)
+		log.Debug().
+			TimeDiff("elapsed_time", time.Now(), startTime).
+			Msgf("done: %s", req.Prefix)
+		return fmt.Errorf("request failed for %s: %v", req.Path, err)
+	}
+	if res.Type != gjson.Null {
+		writeToFileAndZip(filename, res, arc)
+		log.Debug().
+			TimeDiff("elapsed_time", time.Now(), startTime).
+			Msgf("done: %s", req.Prefix)
+		log.Info().Msgf("%s > Complete", req.Prefix)
+	}
 	return nil
 }
 
