@@ -27,13 +27,16 @@ var reqsData []byte
 
 // Request is an HTTP request.
 type Request struct {
-	Api    string // DNAC API
-	Method string
-	Prefix string            // Name for filename and class in DB
-	Query  map[string]string // Query parameters
-	Path   string
-	File   string
-	Format string
+	Api      string            // DNAC API
+	Method   string            // Handle POST and GET
+	Prefix   string            // Name for filename and class in DB
+	Query    map[string]string // Query parameters
+	Path     string            // URI
+	File     string            // Optional name for files to store API results
+	VarStore string            //Variable to store
+	Variable string            //Variable to add to request before making call
+	Store    bool              //Flag to determine if we need to store info from response
+	Version  []int             // Useful to skip execution of APIs
 }
 
 // Normalize chooses correct class and path.
