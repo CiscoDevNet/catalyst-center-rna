@@ -52,7 +52,7 @@ func main() {
 	// Initialize DNA HTTP client
 	client, err := cli.GetClient(cfg)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Error initializing DNAC client.")
+		log.Fatal().Err(err).Msg("Error initializing Catalyst Center client.")
 	}
 
 	// Create results archive

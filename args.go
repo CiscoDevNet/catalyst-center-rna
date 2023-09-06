@@ -39,9 +39,9 @@ func input(prompt string) string {
 
 // Args are command line parameters.
 type Args struct {
-	Dnac              string `arg:"-a,--address" help:"Cisco DNA Center hostname or IP address"`
-	Username          string `arg:"-u,--username" help:"Cisco DNA Center username"`
-	Password          string `arg:"-p,--password" help:"Cisco DNA Center password"`
+	Dnac              string `arg:"-a,--address" help:"Catalyst Center hostname or IP address"`
+	Username          string `arg:"-u,--username" help:"Catalyst Center username"`
+	Password          string `arg:"-p,--password" help:"Catalyst Center password"`
 	Output            string `arg:"-o,--output" help:"Output file"`
 	RequestRetryCount int    `arg:"--request-retry-count" default:"3" help:"Times to retry a failed request"`
 	RetryDelay        int    `arg:"--retry-delay" default:"10" help:"Seconds to wait before retry"`
@@ -50,7 +50,7 @@ type Args struct {
 
 // Description is the CLI description string.
 func (Args) Description() string {
-	return "RNA - Rapid Network Assesment for Cisco DNA Center."
+	return "RNA - Rapid Network Assesment for Catalyst Center."
 }
 
 // Version is the CLI version string.
@@ -83,7 +83,7 @@ func newArgs() Args {
 		}
 	} else {
 		if args.Dnac == "" {
-			args.Dnac = input("DNAC IP:")
+			args.Dnac = input("Catalyst Center IP:")
 		}
 		if args.Username == "" {
 			args.Username = input("Username:")

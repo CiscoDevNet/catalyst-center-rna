@@ -34,7 +34,8 @@
 - api: /dna/intent/api/v1/site
 - api: /dna/intent/api/v1/site/count
 - api: /dna/intent/api/v1/wireless/profile
-- api: /dna/intent/api/v1/enterprise-ssid
+- api: /api/v1/siteprofile/attribute?key=wireless.ssid
+  file: _api_v1_ssid.json
 - api: /dna/intent/api/v1/device-health
 - api: /dna/intent/api/v1/client-health
 - api: /api/system/v1/maglev/release/current
@@ -50,6 +51,11 @@
     - 235
 - api: /dna/intent/api/v1/image/importation
 - api: /dna/intent/api/v1/network-device
+  version:
+    - 233
+    - 235
+- api: /dna/intent/api/v1/network-device?family=Wireless%20Controller
+  file: _dna_intent_api_v1_network-device_wlc
   version:
     - 233
     - 235
@@ -115,7 +121,7 @@
   file: dnac_css_hc_reccuring_sec_adv_is_enabled
 - api: /api/v2/data/customer-facing-service/summary/scalablegroup/access
 - api: /api/assurance/v1/thousandEyes/token
-- api: /api/iox/service/api/v1/appmgr/devices/metadata?searchByApp=ThousandEyes Enterprise Agent
+- api: /api/iox/service/api/v1/appmgr/devices/metadata?searchByApp=ThousandEyes%20Enterprise%20Agent
   file: api_iox_service_api_v1_appmgr_network-device-app-device_thousandyEyes
 - api: /api/v1/server-management/umbrella/health
 - api: /api/endpoint-analytics/v1/eps/setup/status/anomaly-detection
