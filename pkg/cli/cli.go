@@ -62,15 +62,15 @@ func GetClient(cfg Config) (aci.Client, error) {
 		aci.RequestTimeout(600),
 	)
 	if err != nil {
-		return aci.Client{}, fmt.Errorf("failed to create DNAC client: %v", err)
+		return aci.Client{}, fmt.Errorf("failed to create Catalyst Center client: %v", err)
 	}
 
 	// Authenticate
-	log.Info().Str("host", cfg.Host).Msg("DNAC host")
-	log.Info().Str("user", cfg.Username).Msg("DNAC username")
-	log.Info().Msg("Authenticating to the DNAC...")
+	log.Info().Str("host", cfg.Host).Msg("Catalyst Center host")
+	log.Info().Str("user", cfg.Username).Msg("Catalyst Center username")
+	log.Info().Msg("Authenticating to Catalyst Center...")
 	if err := client.Login(); err != nil {
-		return aci.Client{}, fmt.Errorf("cannot authenticate to the DNAC at %s: %v", cfg.Host, err)
+		return aci.Client{}, fmt.Errorf("cannot authenticate to Catalyst Center at %s: %v", cfg.Host, err)
 	}
 	log.Info().Msg("Authentication successfull")
 	return client, nil
