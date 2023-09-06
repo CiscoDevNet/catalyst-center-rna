@@ -18,9 +18,9 @@
 # To create executable files locally
 # first, install gorelease in your machine then use:
 # goreleaser release --snapshot --rm-dist
-# binaries will be available under dist dir
+# binaries will be available under dist dir 
 ---
-project_name: dnac_rna
+project_name: catalyst-center_rna
 env:
   - GO111MODULE=on
   - CGO_ENABLED=0
@@ -30,8 +30,8 @@ before:
     - go mod download
     - go test ./...
 builds:
-  - id: dnac_rna
-    binary: dnac_rna
+  - id: catalyst-center_rna
+    binary: catalyst-center_rna
     main: ./
     goos:
       - windows
@@ -40,14 +40,14 @@ builds:
     goarch:
       - amd64
 archives:
-  - id: dnac_rna
+  - id: catalyst-center_rna
     rlcp: true
     format: zip
     files:
       - README.md
       - LICENSE
     name_template: >-
-      dnac-rna_{{ .Version }}_
+      catalyst-center-rna_{{ .Version }}_
       {{- if eq .Os "darwin" }}MacOS
       {{- else if eq .Os "windows" }}Windows
       {{- else if eq .Os "linux" }}Linux
