@@ -166,6 +166,14 @@
     toDate: "{{toDate}}"
     interval: "1m"
     source: "roi"
+- api: /api/assurance/v1/network-device/poeAnalytics/distribution
+  method: POST
+  file: _api_dna_poe
+  query:
+    startTime : "{{startTime}}"
+    endTime : "{{endTime}}"
+    kpi : "OPER_STATUS"
+    queryType : "LATEST"
 - api: /dna/intent/api/v1/compliance/count?complianceStatus=NON_COMPLIANT
   file: _dna_intent_api_v1_compliance_count_non_compliant
   version:
@@ -207,3 +215,20 @@
 - api: /api/v1/application-recognition/summary/getAppRecFullSummary?siteId={{globalId}}
   variable: "{{globalId}}"
   file: _api_v1_application-recognition_summary
+- api: /api/v1/image/task/count?taskType=distribute,activate
+  file: _api_v1_image_task_count
+- api: /api/v1/image/task/count?taskType=distribute,activate&taskStatus=success
+  file: _api_v1_image_task_count_success
+- api: /dna/intent/api/v1/network
+- api: /api/v1/global-credential?credentialSubType=CLI
+  file: _api_v1_cli_globalcred
+- api: /api/v1/global-credential?credentialSubType=SNMPV2_WRITE_COMMUNITY
+  file: _api_v1_SNMPv2_WR
+- api: /api/v1/global-credential?credentialSubType=SNMPV2_READ_COMMUNITY
+  file: _api_v1_SNMPv2_RO
+- api: /api/v1/global-credential?credentialSubType=SNMPV3
+  file: _api_v1_SNMPv3
+- api: /api/v1/global-credential?credentialSubType=HTTP_READ
+  file: _api_v1_HTTP_RO
+- api: /api/v1/global-credential?credentialSubType=HTTP_WRITE
+  file: _api_v1_HTTP_WR
