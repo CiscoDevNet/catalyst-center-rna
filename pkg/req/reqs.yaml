@@ -232,7 +232,7 @@
   file: _api_v1_HTTP_RO
 - api: /api/v1/global-credential?credentialSubType=HTTP_WRITE
   file: _api_v1_HTTP_WR
-    - api: /dna/intent/api/v1/onboarding/pnp-workflow/count
+- api: /dna/intent/api/v1/onboarding/pnp-workflow/count
   version:
     - 233
     - 235
