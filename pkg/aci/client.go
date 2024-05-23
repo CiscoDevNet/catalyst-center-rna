@@ -170,7 +170,7 @@ func (client *Client) loginAuth(path, data string, mods ...func(*Req)) (Res, err
 // loginAuth creates the initial request to get the token used
 // for subsecuent calls.
 func (client Client) getToken(method, uri string, body io.Reader, mods ...func(*Req)) Req {
-	httpReq, err := http.NewRequest(method, client.host+":443"+uri+"json", body)
+	httpReq, err := http.NewRequest(method, client.host+":443"+uri, body)
 	httpReq.Header.Add("Content-Type", "application/json")
 	httpReq.Header.Add("Accept", "application/json")
 	httpReq.SetBasicAuth(client.Usr, client.Pwd)
