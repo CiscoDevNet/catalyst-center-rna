@@ -48,24 +48,20 @@
 - api: /dna/intent/api/v1/compliance/detail
   version:
     - 233
-    - 235
 - api: /dna/intent/api/v1/image/importation
 - api: /dna/intent/api/v1/network-device
   version:
     - 233
-    - 235
 - api: /dna/intent/api/v1/network-device?family=Wireless%20Controller
   file: _dna_intent_api_v1_network-device_wlc
   version:
     - 233
-    - 235
 - api: /api/v1/network-device
   version:
-    - 223
+    - -223
 - api: /dna/intent/api/v1/network-device/count
   version:
     - 233
-    - 235
 - api: /dna/intent/api/v1/issues
   version:
     - 235
@@ -75,8 +71,7 @@
 - api: /api/assurance/v1/issue/global
   method: POST
   version:
-    - 223
-    - 233
+    - -223
 - api: /dna/intent/api/v1/event/subscription/count
 - api: /dna/intent/api/v1/service-provider
 - api: /api/v1/licensemanager/config/eula
@@ -87,16 +82,14 @@
 - api: /api/v1/eox-status/device
   version:
     - 233
-    - 235
 - api: /dna/intent/api/v1/security-advisory/advisory/aggregate
   file: _dna_intent_api_v1_security-advisory_advisory_aggregate.json
   version:
     - 233
-    - 235
 - api: /api/v1/security-advisory/advisory/aggregate
   file: _dna_intent_api_v1_security-advisory_advisory_aggregate.json
   version:
-    - 223
+    - -223
 - api: /api/system/v1/systemupdater/common/update_status
 - api: /api/system/v1/systemupdater/common/availabe_update_info
 - api: /api/system/v1/maglev/nodes/config
@@ -178,17 +171,14 @@
   file: _dna_intent_api_v1_compliance_count_non_compliant
   version:
     - 233
-    - 235
 - api: /dna/intent/api/v1/compliance/count?complianceStatus=COMPLIANT
   file: _dna_intent_api_v1_compliance_count_compliant
   version:
     - 233
-    - 235
 - api: /dna/intent/api/v1/compliance/detail?complianceType=IMAGE&complianceStatus=NON_COMPLIANT
   file: _dna_intent_api_v1_compliance_count_non_compliant_image
   version:
     - 233
-    - 235
 - api: /dna/intent/api/v1/issues?priority=P2&issueStatus=active
   file: dna_intent_api_v1_issues_p2
   version:
@@ -200,16 +190,14 @@
   file: _dna_intent_api_v1_network-device_insight_speed_duplex
   version:
     - 233
-    - 235
 - api: /dna/intent/api/v1/network-device/insight/{{globalId}}/device-link/count?category=vlan
   variable: "{{globalId}}"
   file: _dna_intent_api_v1_network-device_insight_vlan
   version:
     - 233
-    - 235
 - api: /api/v2/device-image/device
   version:
-    - 223
+    - -223
 - api: /api/v1/dna/telemetry/provision/subscription/ROGUE
 - api: /api/v1/dna/telemetry/provision/subscription/AWIPS
 - api: /api/v1/application-recognition/summary/getAppRecFullSummary?siteId={{globalId}}
@@ -235,10 +223,10 @@
 - api: /dna/intent/api/v1/onboarding/pnp-workflow/count
   version:
     - 233
-    - 235
 - api: /dna/intent/api/v1/discovery/count
   version:
     - 233
-    - 235
 - api: /dna/intent/api/v1/data/reports
 - api: /api/registration/v1/cdnaproxy/assembler-data/devices
+  version:
+    - 235
