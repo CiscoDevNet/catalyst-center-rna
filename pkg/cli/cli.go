@@ -82,9 +82,21 @@ func replacePathPlaceholder(path string, valueToRaplace, replacement string) str
 }
 
 func isVersionInList(version int, list []int) bool {
+	/*
+		Function to determine if an API should be skipped based on the version
+			negative (-) list version means that api will be ran for equal or lower version
+			positive list version means that api will be ran for equal or higer versions
+	*/
 	for _, val := range list {
-		if val == version {
-			return true
+		if val < 0 {
+			val = val * -1
+			if version <= val {
+				return true
+			}
+		} else {
+			if version >= val {
+				return true
+			}
 		}
 	}
 	return false
