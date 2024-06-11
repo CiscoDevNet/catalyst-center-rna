@@ -35,6 +35,7 @@ var log zerolog.Logger
 var globalId string
 var version = 223
 var versionFound bool
+var totalDevices int
 
 // Config is CLI conifg
 type Config struct {
@@ -114,9 +115,8 @@ func setFileName(req req.Request) string {
 
 func writeToFileAndZip(fileName string, res gjson.Result, arc archive.Writer) error {
 	// save APIs call to file
-	var fileContent []byte
+	fileContent := []byte(res.Raw)
 	fileExtension := "json"
-	fileContent = []byte(res.Raw)
 	err := arc.Add(fileName+"."+fileExtension, fileContent)
 	if err != nil {
 		return err
@@ -197,6 +197,39 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 					if len(globalId) > 0 {
 						req.Path = replacePathPlaceholder(req.Path, req.Variable, globalId)
 					}
+				case "offset":
+					pageNumber := (500 + totalDevices - 1) / 500
+					var holder []byte
+					for page := 1; page <= pageNumber; page++ {
+						req.Path = replacePathPlaceholder(req.Path, req.Variable, strconv.Itoa((page*500)-499))
+						log.Info().Msgf("fetching %s...", req.Prefix)
+						log.Debug().Str("url", req.Path).Msg("requesting resource")
+						res, err = client.Get(req.Path, mods...)
+						holder = append(holder, []byte(res.Raw)...)
+						if page < pageNumber {
+							holder = append(holder, ',')
+
+						}
+					}
+					holder = []byte("[" + string(holder) + "]")
+					parsedHolder := gjson.ParseBytes(holder)
+
+					if err != nil {
+						error := createErrorResult(err)
+						writeToFileAndZip(filename, error, arc)
+						log.Debug().
+							TimeDiff("elapsed_time", time.Now(), startTime).
+							Msgf("done: %s", req.Prefix)
+						return fmt.Errorf("request failed for %s: %v", req.Path, err)
+					}
+					if res.Type != gjson.Null {
+						writeToFileAndZip(filename, parsedHolder, arc)
+						log.Debug().
+							TimeDiff("elapsed_time", time.Now(), startTime).
+							Msgf("done: %s", req.Prefix)
+						log.Info().Msgf("%s > Complete", req.Prefix)
+					}
+					return nil
 				}
 			}
 
@@ -256,7 +289,13 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 							log.Info().Msgf("version found is " + fmt.Sprint(version))
 						}
 					}
+				case "deviceCount":
+					if res.Get("response").Exists() {
+						//Store GlobalId value for future calls
+						totalDevices = int(res.Get("response").Int())
+					}
 				}
+
 			}
 		}
 	}
