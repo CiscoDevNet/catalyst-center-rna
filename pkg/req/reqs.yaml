@@ -48,10 +48,13 @@
 - api: /dna/intent/api/v1/compliance/detail
   version:
     - 233
-- api: /dna/intent/api/v1/image/importation
-- api: /dna/intent/api/v1/network-device
+- api: /dna/intent/api/v1/network-device/count
+  store: true
+  varstore: "deviceCount"
   version:
     - 233
+- api: /dna/intent/api/v1/image/importation?isTaggedGolden=true
+  file: _dna_intent_api_v1_image_importation
 - api: /dna/intent/api/v1/network-device?family=Wireless%20Controller
   file: _dna_intent_api_v1_network-device_wlc
   version:
@@ -59,9 +62,6 @@
 - api: /api/v1/network-device
   version:
     - -223
-- api: /dna/intent/api/v1/network-device/count
-  version:
-    - 233
 - api: /dna/intent/api/v1/issues
   version:
     - 235
@@ -93,6 +93,10 @@
 - api: /api/system/v1/systemupdater/common/update_status
 - api: /api/system/v1/systemupdater/common/availabe_update_info
 - api: /api/system/v1/maglev/nodes/config
+- api: /dna/intent/api/v1/network-device?offset={{offset}}
+  variable: "{{offset}}"
+  version:
+    - 233
 - api: /api/v1/disasterrecovery/dr/system/details
 - api: /api/telemetry-agent/v1/membership/info
 - api: /api/v1/inventory/global-settings?propertyName=device_controllability
@@ -175,8 +179,12 @@
   file: _dna_intent_api_v1_compliance_count_compliant
   version:
     - 233
-- api: /dna/intent/api/v1/compliance/detail?complianceType=IMAGE&complianceStatus=NON_COMPLIANT
+- api: /dna/intent/api/v1/compliance/detail/count?complianceType=IMAGE&complianceStatus=NON_COMPLIANT
   file: _dna_intent_api_v1_compliance_count_non_compliant_image
+  version:
+    - 233
+- api: /dna/intent/api/v1/compliance/detail/count?complianceType=IMAGE&complianceStatus=COMPLIANT
+  file: _dna_intent_api_v1_compliance_count_compliant_image
   version:
     - 233
 - api: /dna/intent/api/v1/issues?priority=P2&issueStatus=active
