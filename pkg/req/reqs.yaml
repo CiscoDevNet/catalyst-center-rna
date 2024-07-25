@@ -41,6 +41,9 @@
 - api: /api/system/v1/maglev/release/current
   store: true
   varstore: "version3"
+- api: /api/v1/system-orchestrator/software-management/releases/installed
+  store: true
+  varstore: "version4"
 - api: /dna/intent/api/v1/licenses/device/count?device_type=Switches%20and%20Hubs
   file: dnac_css_hc_switchingDevice_is_present
 - api: /dna/intent/api/v1/licenses/device/count?device_type=Wireless%20Controller
@@ -93,6 +96,7 @@
 - api: /api/system/v1/systemupdater/common/update_status
 - api: /api/system/v1/systemupdater/common/availabe_update_info
 - api: /api/system/v1/maglev/nodes/config
+- api: /dna/intent/api/v1/nodes-config
 - api: /dna/intent/api/v1/network-device?offset={{offset}}
   variable: "{{offset}}"
   version:

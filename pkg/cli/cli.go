@@ -246,7 +246,7 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 						globalId = res.Get("response.0.id").String()
 					}
 				case "version":
-					if versionFound == false {
+					if !versionFound {
 						if res.Get("response.displayVersion").Exists() {
 							stringVersion := res.Get("response.displayVersion").String()
 							slicedVersion := stringVersion[0:5]
@@ -257,7 +257,7 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 						}
 					}
 				case "version2":
-					if versionFound == false {
+					if !versionFound {
 						dictArray := res.Get("response").Array()
 						var versionValue, trimmedVersion string
 						for _, elem := range dictArray {
@@ -279,9 +279,20 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 						}
 					}
 				case "version3":
-					if versionFound == false {
+					if !versionFound {
 						if res.Get("response.version").Exists() {
 							stringVersion := res.Get("response.version").String()
+							slicedVersion := stringVersion[0:5]
+							newStringVersion := strings.ReplaceAll(slicedVersion, ".", "")
+							version, err = strconv.Atoi(newStringVersion)
+							versionFound = true
+							log.Info().Msgf("version found is " + fmt.Sprint(version))
+						}
+					}
+				case "version4":
+					if !versionFound {
+						if res.Get("response.displayVersion").Exists() {
+							stringVersion := res.Get("response.displayVersion").String()
 							slicedVersion := stringVersion[0:5]
 							newStringVersion := strings.ReplaceAll(slicedVersion, ".", "")
 							version, err = strconv.Atoi(newStringVersion)
