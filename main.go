@@ -27,7 +27,6 @@ import (
 	"rna/pkg/req"
 
 	"github.com/rs/zerolog"
-	"golang.org/x/sync/errgroup"
 )
 
 // Version comes from CL
@@ -68,24 +67,15 @@ func main() {
 		log.Fatal().Err(err).Msgf("Error reading requests.")
 	}
 
-	// Batch and fetch queries in parallel
-	batch := 1
-	for i := 0; i < len(reqs); i += args.BatchSize {
-		var g errgroup.Group
-		fmt.Println(strings.Repeat("=", 30))
-		fmt.Println("Fetching request batch", batch)
-		fmt.Println(strings.Repeat("=", 30))
-		for j := i; j < i+args.BatchSize && j < len(reqs); j++ {
-			req := reqs[j]
-			g.Go(func() error {
-				return cli.FetchResource(client, req, arc, cfg)
-			})
-		}
-		err = g.Wait()
-		if err != nil {
-			log.Error().Err(err).Msg("Error fetching data.")
-		}
-		batch++
+	// Use dependency-aware execution for optimal performance and correctness
+	fmt.Println(strings.Repeat("=", 50))
+	fmt.Printf("Starting optimized execution with %d total API requests\n", len(reqs))
+	fmt.Println(strings.Repeat("=", 50))
+
+	executor := cli.NewDependencyExecutor(client, arc, cfg, reqs)
+	err = executor.Execute()
+	if err != nil {
+		log.Error().Err(err).Msg("Error during optimized execution.")
 	}
 
 	cli.CreateDummyFiles(arc)
