@@ -69,8 +69,11 @@ func TestFetch(t *testing.T) {
 		files: make(map[string][]byte),
 	}
 
+	// Create execution context for the test
+	ctx := NewExecutionContext()
+
 	// Write zip
-	err := FetchResource(client, req, arc, NewConfig())
+	err := FetchResource(client, req, arc, NewConfig(), ctx)
 	a.NoError(err)
 
 	// Verify content written to mock archive

@@ -135,6 +135,11 @@
 - api: /api/system/v1/maglev/backup
 - api: /api/v1/sftp
 - api: /api/v1/licensemanager/config/credentials/cco
+  version:
+    - -2377
+- api: /api/system/v1/identitymgmt/fed/ssoContexts/catalyst-center-cco
+  version:
+    - 2379
 - api: /api/v1/image/importation/issuMatrixAvailability
 - api: /api/v1/licensemanager/compliance/licensePurchaseInformation
 - api: /api/assurance/v1/airsense/getIcapSessionList?icapType=full
@@ -211,6 +216,12 @@
   version:
     - -223
 - api: /api/v1/dna/telemetry/provision/subscription/ROGUE
+- api: /dna/system/api/v1/ciscoImcs
+  version:
+    - 2379
+- api: /api/v1/diagnostics/cimc/details
+  version:
+    - -2377
 - api: /api/v1/dna/telemetry/provision/subscription/AWIPS
 - api: /api/v1/application-recognition/summary/getAppRecFullSummary?siteId={{globalId}}
   variable: "{{globalId}}"
