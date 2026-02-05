@@ -38,16 +38,17 @@ builds:
       - linux
       - windows
       - darwin
+    goarch:
+      - arm64
 
 archives:
   - formats: [tar.gz]
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
       {{ .ProjectName }}_{{ .Version }}_
-      {{- if eq .Os "darwin" }}MacOS
-      {{- else if eq .Os "windows" }}Windows
-      {{- else if eq .Os "linux" }}Linux
-      {{- else if eq .Os "amd64" }}64-bit{{ end }}
+      {{- if eq .Os "darwin" }}Mac
+      {{- else }}{{ title .Os }}
+      {{- end }}
 
     # use zip for windows archives
     format_overrides:
