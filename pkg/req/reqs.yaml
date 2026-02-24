@@ -50,31 +50,31 @@
   file: dnac_css_hc_wlc_is_present
 - api: /dna/intent/api/v1/compliance/detail
   version:
-    - 233
+    - ">=2.3.3"
 - api: /dna/intent/api/v1/network-device/count
   store: true
   varstore: "deviceCount"
   version:
-    - 233
+    - ">=2.3.3"
 - api: /dna/intent/api/v1/image/importation?isTaggedGolden=true
   file: _dna_intent_api_v1_image_importation
 - api: /dna/intent/api/v1/network-device?family=Wireless%20Controller
   file: _dna_intent_api_v1_network-device_wlc
   version:
-    - 233
+    - ">=2.3.3"
 - api: /api/v1/network-device
   version:
-    - -223
+    - "<=2.2.3"
 - api: /dna/intent/api/v1/issues
   version:
-    - 235
+    - ">=2.3.5"
 - api: /dna/intent/api/v1/template-programmer/template
 - api: /dna/intent/api/v1/licenses/smartAccounts
 - api: /dna/intent/api/v1/global-pool
 - api: /api/assurance/v1/issue/global
   method: POST
   version:
-    - -223
+    - "<=2.2.3"
 - api: /dna/intent/api/v1/event/subscription/count
 - api: /dna/intent/api/v1/service-provider
 - api: /api/v1/licensemanager/config/eula
@@ -84,15 +84,15 @@
 - api: /dna/intent/api/v1/device-replacement/count
 - api: /api/v1/eox-status/device
   version:
-    - 233
+    - ">=2.3.3"
 - api: /dna/intent/api/v1/security-advisory/advisory/aggregate
   file: _dna_intent_api_v1_security-advisory_advisory_aggregate.json
   version:
-    - 233
+    - ">=2.3.3"
 - api: /api/v1/security-advisory/advisory/aggregate
   file: _dna_intent_api_v1_security-advisory_advisory_aggregate.json
   version:
-    - -223
+    - "<=2.2.3"
 - api: /api/system/v1/systemupdater/common/update_status
 - api: /api/system/v1/systemupdater/common/availabe_update_info
 - api: /api/system/v1/maglev/nodes/config
@@ -100,7 +100,7 @@
 - api: /dna/intent/api/v1/network-device?offset={{offset}}
   variable: "{{offset}}"
   version:
-    - 233
+    - ">=2.3.3"
 - api: /api/v1/disasterrecovery/dr/system/details
 - api: /api/telemetry-agent/v1/membership/info
 - api: /api/v1/inventory/global-settings?propertyName=device_controllability
@@ -136,10 +136,10 @@
 - api: /api/v1/sftp
 - api: /api/v1/licensemanager/config/credentials/cco
   version:
-    - -2377
+    - "<=2.3.7.7"
 - api: /api/system/v1/identitymgmt/fed/ssoContexts/catalyst-center-cco
   version:
-    - 2379
+    - ">=2.3.7.9"
 - api: /api/v1/image/importation/issuMatrixAvailability
 - api: /api/v1/licensemanager/compliance/licensePurchaseInformation
 - api: /api/assurance/v1/airsense/getIcapSessionList?icapType=full
@@ -148,7 +148,7 @@
 - api: /dna/intent/api/v1/issues?priority=P1&issueStatus=active
   file: dna_intent_api_v1_issues_p1
   version:
-    - 235
+    - ">=2.3.5"
 - api: /api/assurance/v1/airsense/getIcapActiveSessionList?icapType=ICAP_RF_STATS
   file: dnac_css_hc_AP_stats_capture_is_enabled
 - api: /api/v1/aca-controller-service/platform/details
@@ -183,45 +183,45 @@
 - api: /dna/intent/api/v1/compliance/count?complianceStatus=NON_COMPLIANT
   file: _dna_intent_api_v1_compliance_count_non_compliant
   version:
-    - 233
+    - ">=2.3.3"
 - api: /dna/intent/api/v1/compliance/count?complianceStatus=COMPLIANT
   file: _dna_intent_api_v1_compliance_count_compliant
   version:
-    - 233
+    - ">=2.3.3"
 - api: /dna/intent/api/v1/compliance/detail/count?complianceType=IMAGE&complianceStatus=NON_COMPLIANT
   file: _dna_intent_api_v1_compliance_count_non_compliant_image
   version:
-    - 233
+    - ">=2.3.3"
 - api: /dna/intent/api/v1/compliance/detail/count?complianceType=IMAGE&complianceStatus=COMPLIANT
   file: _dna_intent_api_v1_compliance_count_compliant_image
   version:
-    - 233
+    - ">=2.3.3"
 - api: /dna/intent/api/v1/issues?priority=P2&issueStatus=active
   file: dna_intent_api_v1_issues_p2
   version:
-    - 235
+    - ">=2.3.5"
 - api: /api/endpoint-analytics/v1/eps/endpoint/count?trustScoreSummary=true&classification=all
   file: dnac_css_hc_endpoint_trustscores
 - api: /dna/intent/api/v1/network-device/insight/{{globalId}}/device-link/count?category=speed-duplex
   variable: "{{globalId}}"
   file: _dna_intent_api_v1_network-device_insight_speed_duplex
   version:
-    - 233
+    - ">=2.3.3"
 - api: /dna/intent/api/v1/network-device/insight/{{globalId}}/device-link/count?category=vlan
   variable: "{{globalId}}"
   file: _dna_intent_api_v1_network-device_insight_vlan
   version:
-    - 233
+    - ">=2.3.3"
 - api: /api/v2/device-image/device
   version:
-    - -223
+    - "<=2.2.3"
 - api: /api/v1/dna/telemetry/provision/subscription/ROGUE
 - api: /dna/system/api/v1/ciscoImcs
   version:
-    - 2379
+    - ">=2.3.7.9"
 - api: /api/v1/diagnostics/cimc/details
   version:
-    - -2377
+    - "<=2.3.7.7"
 - api: /api/v1/dna/telemetry/provision/subscription/AWIPS
 - api: /api/v1/application-recognition/summary/getAppRecFullSummary?siteId={{globalId}}
   variable: "{{globalId}}"
@@ -245,11 +245,11 @@
   file: _api_v1_HTTP_WR
 - api: /dna/intent/api/v1/onboarding/pnp-workflow/count
   version:
-    - 233
+    - ">=2.3.3"
 - api: /dna/intent/api/v1/discovery/count
   version:
-    - 233
+    - ">=2.3.3"
 - api: /dna/intent/api/v1/data/reports
 - api: /api/registration/v1/cdnaproxy/assembler-data/devices
   version:
-    - 235
+    - ">=2.3.5"

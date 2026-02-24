@@ -18,6 +18,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"rna/pkg/aci"
 	"rna/pkg/archive"
 	"rna/pkg/logger"
@@ -34,10 +35,98 @@ import (
 
 var log zerolog.Logger
 
+var detectedVersionPattern = regexp.MustCompile(`^(\d+)\.(\d+)\.(\d+)(?:\.(\d+))?`)
+var versionConstraintPattern = regexp.MustCompile(`^(<=|>=|<|>|=)?(\d+(?:\.\d+){2,3})$`)
+
+func parseDetectedVersion(version string) (string, error) {
+	matches := detectedVersionPattern.FindStringSubmatch(strings.TrimSpace(version))
+	if len(matches) == 0 {
+		return "", fmt.Errorf("invalid version format: %s", version)
+	}
+
+	parts := []string{matches[1], matches[2], matches[3]}
+	if len(matches) > 4 && matches[4] != "" {
+		parts = append(parts, matches[4])
+	}
+
+	return strings.Join(parts, "."), nil
+}
+
+func parseVersionParts(version string) ([]int, error) {
+	parts := strings.Split(version, ".")
+	if len(parts) < 3 || len(parts) > 4 {
+		return nil, fmt.Errorf("invalid semantic version: %s", version)
+	}
+
+	result := make([]int, 4)
+	for i, part := range parts {
+		value, err := strconv.Atoi(part)
+		if err != nil {
+			return nil, fmt.Errorf("invalid semantic version: %s", version)
+		}
+		result[i] = value
+	}
+
+	return result, nil
+}
+
+func compareVersions(current, target []int) int {
+	for i := 0; i < 4; i++ {
+		if current[i] < target[i] {
+			return -1
+		}
+		if current[i] > target[i] {
+			return 1
+		}
+	}
+
+	return 0
+}
+
+func isVersionMatch(currentVersion string, constraint string) bool {
+	trimmedConstraint := strings.TrimSpace(constraint)
+	matches := versionConstraintPattern.FindStringSubmatch(trimmedConstraint)
+	if len(matches) != 3 {
+		return false
+	}
+
+	operator := matches[1]
+	if operator == "" {
+		operator = "="
+	}
+
+	currentParts, err := parseVersionParts(currentVersion)
+	if err != nil {
+		return false
+	}
+
+	targetParts, err := parseVersionParts(matches[2])
+	if err != nil {
+		return false
+	}
+
+	comparison := compareVersions(currentParts, targetParts)
+
+	switch operator {
+	case "<":
+		return comparison < 0
+	case "<=":
+		return comparison <= 0
+	case ">":
+		return comparison > 0
+	case ">=":
+		return comparison >= 0
+	case "=":
+		return comparison == 0
+	default:
+		return false
+	}
+}
+
 // ExecutionContext manages shared state in a thread-safe manner
 type ExecutionContext struct {
 	globalID     string
-	version      int
+	version      string
 	versionFound bool
 	totalDevices int
 	mu           sync.RWMutex
@@ -46,7 +135,7 @@ type ExecutionContext struct {
 // NewExecutionContext creates a new context with default values
 func NewExecutionContext() *ExecutionContext {
 	return &ExecutionContext{
-		version: 223, // Default version
+		version: "2.2.3", // Default version
 	}
 }
 
@@ -63,14 +152,14 @@ func (ctx *ExecutionContext) GetGlobalID() string {
 	return ctx.globalID
 }
 
-func (ctx *ExecutionContext) SetVersion(v int) {
+func (ctx *ExecutionContext) SetVersion(v string) {
 	ctx.mu.Lock()
 	defer ctx.mu.Unlock()
 	ctx.version = v
 	ctx.versionFound = true
 }
 
-func (ctx *ExecutionContext) GetVersion() (int, bool) {
+func (ctx *ExecutionContext) GetVersion() (string, bool) {
 	ctx.mu.RLock()
 	defer ctx.mu.RUnlock()
 	return ctx.version, ctx.versionFound
@@ -175,7 +264,7 @@ func (e *DependencyExecutor) executeVersionDetection() error {
 
 	log.Info().Msgf("Detecting version using %d endpoints...", len(e.versionAPIs))
 
-	versionChan := make(chan int, len(e.versionAPIs))
+	versionChan := make(chan string, len(e.versionAPIs))
 	var wg sync.WaitGroup
 
 	for _, api := range e.versionAPIs {
@@ -191,7 +280,7 @@ func (e *DependencyExecutor) executeVersionDetection() error {
 			if version, found := e.ctx.GetVersion(); found {
 				select {
 				case versionChan <- version:
-					log.Info().Msgf("Version %d detected via %s", version, req.Api)
+					log.Info().Msgf("Version %s detected via %s", version, req.Api)
 				default: // Channel full, another goroutine already succeeded
 				}
 			}
@@ -206,7 +295,7 @@ func (e *DependencyExecutor) executeVersionDetection() error {
 
 	select {
 	case version := <-versionChan:
-		log.Info().Msgf("Using detected version: %d", version)
+		log.Info().Msgf("Using detected version: %s", version)
 		return nil
 	case <-time.After(30 * time.Second):
 		log.Warn().Msg("Version detection timeout, using default version 223")
@@ -320,7 +409,7 @@ func (e *DependencyExecutor) filterByVersion(requests []req.Request) []req.Reque
 		if e.isVersionCompatible(req) {
 			filtered = append(filtered, req)
 		} else {
-			log.Debug().Msgf("Skipping %s due to version incompatibility (current: %d, required: %v)",
+			log.Debug().Msgf("Skipping %s due to version incompatibility (current: %s, required: %v)",
 				req.Prefix, version, req.Version)
 		}
 	}
@@ -379,22 +468,10 @@ func replacePathPlaceholder(path string, valueToRaplace, replacement string) str
 	return tempPath
 }
 
-func isVersionInList(version int, list []int) bool {
-	/*
-		Function to determine if an API should be skipped based on the version
-			negative (-) list version means that api will be ran for equal or lower version
-			positive list version means that api will be ran for equal or higer versions
-	*/
-	for _, val := range list {
-		if val < 0 {
-			val = val * -1
-			if version <= val {
-				return true
-			}
-		} else {
-			if version >= val {
-				return true
-			}
+func isVersionInList(version string, list []string) bool {
+	for _, constraint := range list {
+		if isVersionMatch(version, constraint) {
+			return true
 		}
 	}
 	return false
@@ -539,7 +616,7 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 	var err error
 	var res gjson.Result
 
-	// Determie if it's POST operation and version requirements
+	// Determine if it's POST operation and version requirements
 	currentVersion, _ := ctx.GetVersion()
 	if req.Method == "POST" && (len(req.Version) == 0 || isVersionInList(currentVersion, req.Version)) {
 		data = body.Str
@@ -603,9 +680,7 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 					if _, versionFound := ctx.GetVersion(); !versionFound {
 						if res.Get("response.displayVersion").Exists() {
 							stringVersion := res.Get("response.displayVersion").String()
-							slicedVersion := stringVersion[0:7]
-							newStringVersion := strings.ReplaceAll(slicedVersion, ".", "")
-							if parsedVersion, err := strconv.Atoi(newStringVersion); err == nil {
+							if parsedVersion, err := parseDetectedVersion(stringVersion); err == nil {
 								ctx.SetVersion(parsedVersion)
 								log.Info().Msgf("version found is " + fmt.Sprint(parsedVersion))
 							}
@@ -623,9 +698,9 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 									versionValue = strings.Split(appstackValue, ":")[1]
 									trimmedVersion = versionValue[0:3]
 									if trimmedVersion == "1.6" {
-										// if 1.6  set version  to 223
-										ctx.SetVersion(223)
-										log.Info().Msgf("version found is 223")
+										// if 1.6  set version to 2.2.3
+										ctx.SetVersion("2.2.3")
+										log.Info().Msgf("version found is 2.2.3")
 									}
 									break
 								}
@@ -636,9 +711,7 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 					if _, versionFound := ctx.GetVersion(); !versionFound {
 						if res.Get("response.version").Exists() {
 							stringVersion := res.Get("response.version").String()
-							slicedVersion := stringVersion[0:7]
-							newStringVersion := strings.ReplaceAll(slicedVersion, ".", "")
-							if parsedVersion, err := strconv.Atoi(newStringVersion); err == nil {
+							if parsedVersion, err := parseDetectedVersion(stringVersion); err == nil {
 								ctx.SetVersion(parsedVersion)
 								log.Info().Msgf("version found is " + fmt.Sprint(parsedVersion))
 							}
@@ -648,9 +721,7 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 					if _, versionFound := ctx.GetVersion(); !versionFound {
 						if res.Get("response.displayVersion").Exists() {
 							stringVersion := res.Get("response.displayVersion").String()
-							slicedVersion := stringVersion[0:7]
-							newStringVersion := strings.ReplaceAll(slicedVersion, ".", "")
-							if parsedVersion, err := strconv.Atoi(newStringVersion); err == nil {
+							if parsedVersion, err := parseDetectedVersion(stringVersion); err == nil {
 								ctx.SetVersion(parsedVersion)
 								log.Info().Msgf("version found is " + fmt.Sprint(parsedVersion))
 							}

@@ -36,7 +36,7 @@ type Request struct {
 	VarStore string            //Variable to store
 	Variable string            //Variable to add to request before making call
 	Store    bool              //Flag to determine if we need to store info from response
-	Version  []int             // Useful to skip execution of APIs
+	Version  []string          // Semantic version constraints used to skip execution of APIs
 }
 
 // Normalize chooses correct class and path.

@@ -83,3 +83,52 @@ func TestFetch(t *testing.T) {
 	a.Equal("ndp-platform:1.6.1715", api.Get("0.fqn").Str)
 	a.Equal("ndp-platform", api.Get("1.name").Str)
 }
+
+func TestIsVersionInList(t *testing.T) {
+	tests := []struct {
+		name        string
+		version     string
+		constraints []string
+		expected    bool
+	}{
+		{name: "Lower or equal match", version: "2.3.7.7", constraints: []string{"<=2.3.7.7"}, expected: true},
+		{name: "Lower or equal no match", version: "2.3.7.10", constraints: []string{"<=2.3.7.7"}, expected: false},
+		{name: "Higher or equal match", version: "2.3.7.10", constraints: []string{">=2.3.7.9"}, expected: true},
+		{name: "3.x is higher than 2.x", version: "3.1.1", constraints: []string{">=2.3.7.10"}, expected: true},
+		{name: "Exact match", version: "3.1.1", constraints: []string{"=3.1.1"}, expected: true},
+		{name: "OR constraints", version: "2.2.3", constraints: []string{"<=2.2.3", ">=3.0.0"}, expected: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, isVersionInList(tt.version, tt.constraints))
+		})
+	}
+}
+
+func TestParseDetectedVersion(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+		wantErr  bool
+	}{
+		{name: "Four segments", input: "2.3.7.10", expected: "2.3.7.10", wantErr: false},
+		{name: "Three segments", input: "3.1.1", expected: "3.1.1", wantErr: false},
+		{name: "With suffix", input: "2.3.7.10-build45", expected: "2.3.7.10", wantErr: false},
+		{name: "Invalid", input: "version-unknown", expected: "", wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := parseDetectedVersion(tt.input)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
