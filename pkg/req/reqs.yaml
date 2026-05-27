@@ -35,7 +35,7 @@
 - api: /dna/intent/api/v1/site/count
 - api: /dna/intent/api/v1/wireless/profile
 - api: /api/v1/siteprofile/attribute?key=wireless.ssid
-  file: _api_v1_ssid.json
+  file: _api_v1_ssid
 - api: /dna/intent/api/v1/device-health
 - api: /dna/intent/api/v1/client-health
 - api: /api/system/v1/maglev/release/current
@@ -80,17 +80,17 @@
 - api: /api/v1/licensemanager/config/eula
 - api: /api/v1/dna-maps-service/preferences/cmxServers
 - api: /dna/intent/api/v1/site?type=building
-  file: _dna_intent_api_v1_site_building.json
+  file: _dna_intent_api_v1_site_building
 - api: /dna/intent/api/v1/device-replacement/count
 - api: /api/v1/eox-status/device
   version:
     - ">=2.3.3"
 - api: /dna/intent/api/v1/security-advisory/advisory/aggregate
-  file: _dna_intent_api_v1_security-advisory_advisory_aggregate.json
+  file: _dna_intent_api_v1_security-advisory_advisory_aggregate
   version:
     - ">=2.3.3"
 - api: /api/v1/security-advisory/advisory/aggregate
-  file: _dna_intent_api_v1_security-advisory_advisory_aggregate.json
+  file: _dna_intent_api_v1_security-advisory_advisory_aggregate
   version:
     - "<=2.2.3"
 - api: /api/system/v1/systemupdater/common/update_status
@@ -98,6 +98,7 @@
 - api: /api/system/v1/maglev/nodes/config
 - api: /dna/intent/api/v1/nodes-config
 - api: /dna/intent/api/v1/network-device?offset={{offset}}
+  file: _dna_intent_api_v1_network-device_offset
   variable: "{{offset}}"
   version:
     - ">=2.3.3"
@@ -130,6 +131,8 @@
 - api: /api/v1/application-recognition/externalSources/ms-office-365
 - api: /api/system/v1/identitymgmt/aaa-server/external-authentication
 - api: /api/v1/nfv-provisioning-service/vmanage-credentials
+  version:
+    - "<=2.3.7.4"
 - api: /api/v1/server-management/stealthwatch
 - api: /api/v2/data/customer-facing-service/summary/policy/application
 - api: /api/system/v1/maglev/backup
@@ -165,13 +168,13 @@
     startTime : "{{startTime}}"
     endTime : "{{endTime}}"
     approach: "latest"
-- api: /api/cloud-connectivity-sense/v1/sense-op/insight/1/roi/report
-  file: _api_dna_roi
-  query:
-    fromDate: "{{fromDate}}"
-    toDate: "{{toDate}}"
-    interval: "1m"
-    source: "roi"
+# - api: /api/cloud-connectivity-sense/v1/sense-op/insight/1/roi/report
+#   file: _api_dna_roi
+#   query:
+#     fromDate: "{{fromDate}}"
+#     toDate: "{{toDate}}"
+#     interval: "1m"
+#     source: "roi"
 - api: /api/assurance/v1/network-device/poeAnalytics/distribution
   method: POST
   file: _api_dna_poe
@@ -230,26 +233,51 @@
   file: _api_v1_image_task_count
 - api: /api/v1/image/task/count?taskType=distribute,activate&taskStatus=success
   file: _api_v1_image_task_count_success
+  version:
+    - "<=2.3.5.6"
 - api: /dna/intent/api/v1/network
 - api: /api/v1/global-credential?credentialSubType=CLI
+  version:
+    - "<=2.3.5.6"
   file: _api_v1_cli_globalcred
 - api: /api/v1/global-credential?credentialSubType=SNMPV2_WRITE_COMMUNITY
+  version:
+    - "<=2.3.5.6"
   file: _api_v1_SNMPv2_WR
 - api: /api/v1/global-credential?credentialSubType=SNMPV2_READ_COMMUNITY
+  version:
+    - "<=2.3.5.6"
   file: _api_v1_SNMPv2_RO
 - api: /api/v1/global-credential?credentialSubType=SNMPV3
+  version:
+    - "<=2.3.5.6"
   file: _api_v1_SNMPv3
 - api: /api/v1/global-credential?credentialSubType=HTTP_READ
+  version:
+    - "<=2.3.5.6"
   file: _api_v1_HTTP_RO
 - api: /api/v1/global-credential?credentialSubType=HTTP_WRITE
+  version:
+    - "<=2.3.5.6"
   file: _api_v1_HTTP_WR
 - api: /dna/intent/api/v1/onboarding/pnp-workflow/count
   version:
     - ">=2.3.3"
 - api: /dna/intent/api/v1/discovery/count
   version:
-    - ">=2.3.3"
+    - "<=2.3.5.6"
 - api: /dna/intent/api/v1/data/reports
 - api: /api/registration/v1/cdnaproxy/assembler-data/devices
   version:
     - ">=2.3.5"
+- api: /dna/intent/api/v2/global-credential
+  version:
+    - ">=2.3.7.4"
+- api: /api/v1/image/task/aggregatedCount?taskType=distribute,activate
+  version:
+    - ">=2.3.7.4"
+  file: _api_v1_image_task_aggregatedCount
+- api: /api/v1/registration/cdnaproxy/assembler-data?deviceType=DNAC
+  version:
+    - ">=2.3.7.4"
+  file: _api_v1_registration_cdnaproxy_assembler_data
