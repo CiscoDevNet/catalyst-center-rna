@@ -157,8 +157,10 @@
 - api: /api/v1/aca-controller-service/platform/details
 - api: /api/assurance/v1/airsense/getIcapActiveSessionList?icapType=ICAP_ANOMALY
   file: dnac_css_hc_Anomaly_Capture_is_enabled
-- api: /api/v1/task?serviceType=NCIV&data=KGV-UPLOAD-TASK-SCHEDULED&sortBy=endTime&order=dsc&limit=1
+- api: /api/v1/task?serviceType=NCIV&data=KGV-UPLOAD-TASK-FILE-SCHEDULED&sortBy=endTime&order=dsc&limit=1
   file: dnac_css_hc_updated_KGV_is_present
+  version:
+    - ">=2.3.7.9"
 - api: /api/assurance/v1/network-device/healthSummary
   file: api_assurance_v1_network-device_healthSummary
   method: POST
