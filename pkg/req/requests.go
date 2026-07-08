@@ -27,16 +27,17 @@ var reqsData []byte
 
 // Request is an HTTP request.
 type Request struct {
-	Api      string            // DNAC API
-	Method   string            // Handle POST and GET
-	Prefix   string            // Name for filename and class in DB
-	Query    map[string]string // Query parameters
-	Path     string            // URI
-	File     string            // Optional name for files to store API results
-	VarStore string            //Variable to store
-	Variable string            //Variable to add to request before making call
-	Store    bool              //Flag to determine if we need to store info from response
-	Version  []string          // Semantic version constraints used to skip execution of APIs
+	Api         string            // DNAC API
+	Method      string            // Handle POST and GET
+	Prefix      string            // Name for filename and class in DB
+	Query       map[string]string // Query parameters
+	Path        string            // URI
+	File        string            // Optional name for files to store API results
+	VarStore    string            //Variable to store
+	Variable    string            //Variable to add to request before making call
+	Store       bool              //Flag to determine if we need to store info from response
+	Version     []string          // Semantic version constraints used to skip execution of APIs
+	VersionMode string            `yaml:"version_mode"` // Constraint evaluation mode: "and" or default OR
 }
 
 // Normalize chooses correct class and path.

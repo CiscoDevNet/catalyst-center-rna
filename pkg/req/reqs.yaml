@@ -141,8 +141,14 @@
   version:
     - "<=2.3.7.7"
 - api: /api/system/v1/identitymgmt/fed/ssoContexts/catalyst-center-cco
+  version_mode: and
   version:
     - ">=2.3.7.9"
+    - "<3.1.6"
+- api: /idm/api/v1/fed/ssoContexts/catalyst-center-cco
+  version:
+    - ">=3.1.6"
+  file: _idm_api_v1_fed_ssoContexts_catalyst-center-cco
 - api: /api/v1/image/importation/issuMatrixAvailability
 - api: /api/v1/licensemanager/compliance/licensePurchaseInformation
 - api: /api/assurance/v1/airsense/getIcapSessionList?icapType=full
@@ -164,7 +170,7 @@
 - api: /api/assurance/v1/network-device/healthSummary
   file: api_assurance_v1_network-device_healthSummary
   method: POST
-  query: 
+  query:
     measureBy: "global"
     windowInMin: "1"
     startTime : "{{startTime}}"

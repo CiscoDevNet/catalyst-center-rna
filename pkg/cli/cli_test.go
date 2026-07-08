@@ -89,19 +89,23 @@ func TestIsVersionInList(t *testing.T) {
 		name        string
 		version     string
 		constraints []string
+		mode        string
 		expected    bool
 	}{
-		{name: "Lower or equal match", version: "2.3.7.7", constraints: []string{"<=2.3.7.7"}, expected: true},
-		{name: "Lower or equal no match", version: "2.3.7.10", constraints: []string{"<=2.3.7.7"}, expected: false},
-		{name: "Higher or equal match", version: "2.3.7.10", constraints: []string{">=2.3.7.9"}, expected: true},
-		{name: "3.x is higher than 2.x", version: "3.1.1", constraints: []string{">=2.3.7.10"}, expected: true},
-		{name: "Exact match", version: "3.1.1", constraints: []string{"=3.1.1"}, expected: true},
-		{name: "OR constraints", version: "2.2.3", constraints: []string{"<=2.2.3", ">=3.0.0"}, expected: true},
+		{name: "Lower or equal match", version: "2.3.7.7", constraints: []string{"<=2.3.7.7"}, mode: "", expected: true},
+		{name: "Lower or equal no match", version: "2.3.7.10", constraints: []string{"<=2.3.7.7"}, mode: "", expected: false},
+		{name: "Higher or equal match", version: "2.3.7.10", constraints: []string{">=2.3.7.9"}, mode: "", expected: true},
+		{name: "3.x is higher than 2.x", version: "3.1.1", constraints: []string{">=2.3.7.10"}, mode: "", expected: true},
+		{name: "Exact match", version: "3.1.1", constraints: []string{"=3.1.1"}, mode: "", expected: true},
+		{name: "OR constraints", version: "2.2.3", constraints: []string{"<=2.2.3", ">=3.0.0"}, mode: "", expected: true},
+		{name: "AND constraints in range", version: "2.3.7.10", constraints: []string{">=2.3.7.9", "<3.1.6"}, mode: "and", expected: true},
+		{name: "AND constraints out of range", version: "3.1.6", constraints: []string{">=2.3.7.9", "<3.1.6"}, mode: "and", expected: false},
+		{name: "Unknown mode falls back to OR", version: "3.1.6", constraints: []string{">=2.3.7.9", "<3.1.6"}, mode: "unexpected", expected: true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, isVersionInList(tt.version, tt.constraints))
+			assert.Equal(t, tt.expected, isVersionInList(tt.version, tt.constraints, tt.mode))
 		})
 	}
 }
@@ -130,5 +134,21 @@ func TestParseDetectedVersion(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
 		})
+	}
+}
+
+func TestCategorizeRequests_DeviceCountPointerUsesCorrectRequest(t *testing.T) {
+	a := assert.New(t)
+
+	requests := []req.Request{
+		{Api: "/dna/intent/api/v1/network-device/count", Path: "/dna/intent/api/v1/network-device/count", VarStore: "deviceCount"},
+		{Api: "/api/v1/registration/cdnaproxy/assembler-data?deviceType=DNAC", Path: "/api/v1/registration/cdnaproxy/assembler-data?deviceType=DNAC"},
+	}
+
+	executor := NewDependencyExecutor(aci.Client{}, mockArchiveWriter{files: make(map[string][]byte)}, NewConfig(), requests)
+
+	if a.NotNil(executor.deviceCountAPI) {
+		a.Equal("/dna/intent/api/v1/network-device/count", executor.deviceCountAPI.Api)
+		a.Equal("deviceCount", executor.deviceCountAPI.VarStore)
 	}
 }

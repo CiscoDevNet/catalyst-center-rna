@@ -207,22 +207,25 @@ func NewDependencyExecutor(client aci.Client, arc archive.Writer, cfg Config, re
 
 // categorizeRequests separates requests by their dependency requirements
 func (e *DependencyExecutor) categorizeRequests(requests []req.Request) {
-	for _, req := range requests {
-		switch req.VarStore {
+	for i := range requests {
+		r := requests[i]
+
+		switch r.VarStore {
 		case "version", "version2", "version3", "version4":
-			e.versionAPIs = append(e.versionAPIs, req)
+			e.versionAPIs = append(e.versionAPIs, r)
 		case "globalId":
-			e.globalAPIs = append(e.globalAPIs, req)
+			e.globalAPIs = append(e.globalAPIs, r)
 		case "deviceCount":
-			e.deviceCountAPI = &req
+			// Keep a pointer to the slice element, not the range variable.
+			e.deviceCountAPI = &requests[i]
 		default:
 			// Check if request depends on variables
-			if len(req.Variable) > 0 {
-				e.dependentAPIs = append(e.dependentAPIs, req)
-			} else if req.Store {
-				e.dependentAPIs = append(e.dependentAPIs, req)
+			if len(r.Variable) > 0 {
+				e.dependentAPIs = append(e.dependentAPIs, r)
+			} else if r.Store {
+				e.dependentAPIs = append(e.dependentAPIs, r)
 			} else {
-				e.independentAPIs = append(e.independentAPIs, req)
+				e.independentAPIs = append(e.independentAPIs, r)
 			}
 		}
 	}
@@ -420,7 +423,7 @@ func (e *DependencyExecutor) filterByVersion(requests []req.Request) []req.Reque
 // isVersionCompatible checks if request is compatible with current version
 func (e *DependencyExecutor) isVersionCompatible(req req.Request) bool {
 	version, _ := e.ctx.GetVersion()
-	return len(req.Version) == 0 || isVersionInList(version, req.Version)
+	return len(req.Version) == 0 || isVersionInList(version, req.Version, req.VersionMode)
 }
 
 // Config is CLI conifg
@@ -468,13 +471,27 @@ func replacePathPlaceholder(path string, valueToRaplace, replacement string) str
 	return tempPath
 }
 
-func isVersionInList(version string, list []string) bool {
-	for _, constraint := range list {
-		if isVersionMatch(version, constraint) {
-			return true
-		}
+func isVersionInList(version string, list []string, mode string) bool {
+	if len(list) == 0 {
+		return true
 	}
-	return false
+
+	switch strings.ToLower(strings.TrimSpace(mode)) {
+	case "and":
+		for _, constraint := range list {
+			if !isVersionMatch(version, constraint) {
+				return false
+			}
+		}
+		return true
+	default:
+		for _, constraint := range list {
+			if isVersionMatch(version, constraint) {
+				return true
+			}
+		}
+		return false
+	}
 }
 
 func setFileName(req req.Request) string {
@@ -618,7 +635,7 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 
 	// Determine if it's POST operation and version requirements
 	currentVersion, _ := ctx.GetVersion()
-	if req.Method == "POST" && (len(req.Version) == 0 || isVersionInList(currentVersion, req.Version)) {
+	if req.Method == "POST" && (len(req.Version) == 0 || isVersionInList(currentVersion, req.Version, req.VersionMode)) {
 		data = body.Str
 		log.Info().Msgf("fetching %s...", req.Prefix)
 		log.Debug().Str("url", req.Path).Msg("requesting resource")
@@ -626,7 +643,7 @@ func FetchResource(client aci.Client, req req.Request, arc archive.Writer, cfg C
 
 	} else {
 		// Check  version requirement to run API
-		if len(req.Version) == 0 || isVersionInList(currentVersion, req.Version) {
+		if len(req.Version) == 0 || isVersionInList(currentVersion, req.Version, req.VersionMode) {
 			//Replace req.Path yaml variable with value
 			if len(req.Variable) > 0 {
 				trimmedVariable := strings.Trim(req.Variable, "{}")
